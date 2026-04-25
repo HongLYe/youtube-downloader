@@ -32,39 +32,23 @@ KNOWN_COOKIE_FILES = [str(_get_cookie_file_path())]
 
 
 def _setup_cookies(ydl_opts: dict):
-    """Try cookie file first, then Chrome → Firefox → Edge."""
-    localappdata = os.environ.get("LOCALAPPDATA", "")
-    appdata = os.environ.get("APPDATA", "")
-
+    """Try cookie file first, then skip browser cookies to avoid errors.
+    
+    Browser cookie extraction often fails when Chrome is running.
+    For age-restricted videos, users should provide a cookie file.
+    """
     # 1) Cookie file (relative to script, not hardcoded absolute path)
     for cf in KNOWN_COOKIE_FILES:
         if cf and os.path.exists(cf) and os.path.getsize(cf) > 0:
             ydl_opts["cookiefile"] = cf
+            print("✓ Using cookie file for authentication")
             return
 
-    # 2) Chrome (Profile/Network/Cookies on modern Chrome)
-    for cp in [
-        os.path.join(localappdata, r"Google\Chrome\User Data\Default\Network\Cookies"),
-        os.path.join(localappdata, r"Google\Chrome\User Data\Profile 1\Network\Cookies"),
-        os.path.join(localappdata, r"Google\Chrome\User Data\Profile 2\Network\Cookies"),
-    ]:
-        if os.path.exists(cp):
-            ydl_opts["cookiesfrombrowser"] = ("chrome",)
-            return
-
-    # 3) Firefox
-    if glob.glob(os.path.join(appdata, r"Mozilla\Firefox\Profiles\*\cookies.sqlite")):
-        ydl_opts["cookiesfrombrowser"] = ("firefox",)
-        return
-
-    # 4) Edge
-    for ep in [
-        os.path.join(localappdata, r"Microsoft\Edge\User Data\Default\Network\Cookies"),
-        os.path.join(localappdata, r"Microsoft\Edge\User Data\Profile 1\Network\Cookies"),
-    ]:
-        if os.path.exists(ep):
-            ydl_opts["cookiesfrombrowser"] = ("edge",)
-            return
+    # Skip browser cookie extraction to avoid Chrome database errors
+    # Browser cookies require Chrome to be closed and proper permissions
+    # Users can manually export cookies if needed for age-restricted content
+    print("ℹ️  No cookie file found. Downloads will work for non-restricted videos.")
+    print("   For age-restricted videos, create a 'www.youtube.com_cookies.txt' file.")
 
 
 # ===========================================================================
