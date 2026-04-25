@@ -99,7 +99,7 @@ def ts() -> str:
 def _setup_cookies(ydl_opts: dict):
     """Use cookie file if present and non-empty, else fall back to browser.
 
-    Note: Chrome stores cookies in Profile/N\Cookies on Windows 10+.
+    Note: Chrome stores cookies in Profile/N\\Cookies on Windows 10+.
     The Cookies file is locked while the browser is running —
     yt-dlp handles this by making a shadow copy, but it only
     works when called as --cookies-from-browser chrome.

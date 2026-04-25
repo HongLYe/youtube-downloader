@@ -20,9 +20,15 @@ import yt_dlp
 # ===========================================================================
 # Cookie setup — fallback chain
 # ===========================================================================
-KNOWN_COOKIE_FILES = [
-    r"C:\Users\GioZ\Desktop\UI\www.youtube.com_cookies.txt",
-]
+import pathlib
+
+def _get_cookie_file_path():
+    """Get cookie file path relative to script location."""
+    script_dir = pathlib.Path(__file__).parent
+    return script_dir / "www.youtube.com_cookies.txt"
+
+
+KNOWN_COOKIE_FILES = [str(_get_cookie_file_path())]
 
 
 def _setup_cookies(ydl_opts: dict):
@@ -30,9 +36,9 @@ def _setup_cookies(ydl_opts: dict):
     localappdata = os.environ.get("LOCALAPPDATA", "")
     appdata = os.environ.get("APPDATA", "")
 
-    # 1) Cookie file
+    # 1) Cookie file (relative to script, not hardcoded absolute path)
     for cf in KNOWN_COOKIE_FILES:
-        if os.path.exists(cf) and os.path.getsize(cf) > 0:
+        if cf and os.path.exists(cf) and os.path.getsize(cf) > 0:
             ydl_opts["cookiefile"] = cf
             return
 
@@ -238,7 +244,7 @@ class YouTubeAudioDownloader:
                 info = ydl.extract_info(url, download=False)
             thumbnail_url = info.get("thumbnail", "")
             if thumbnail_url:
-                clean_title = re.sub(r'[<>:"/\\|?*]', "", video_title)
+                clean_title = re.sub(r'[<>:"/\|?*]', '_', video_title)[:150]
                 cover_filename = os.path.join(self.cover_dir, f"{clean_title}.jpg")
                 response = requests.get(thumbnail_url, timeout=10)
                 response.raise_for_status()
@@ -255,6 +261,8 @@ class YouTubeAudioDownloader:
         if not self.is_valid_youtube_url(url):
             return {"success": False, "error": "Invalid YouTube URL"}
 
+        options = options or {}
+        
         try:
             video_info = self.get_video_info(url)
             if not video_info["success"]:
@@ -262,24 +270,29 @@ class YouTubeAudioDownloader:
 
             video_title = video_info["data"]["title"]
 
+            # Sanitize title for filesystem
+            safe_title = re.sub(r'[<>:"/\\|?*]', '_', video_title)[:200]
+
             if options.get("cover", True):
-                self.download_cover_image(url, video_title)
+                self.download_cover_image(url, safe_title)
 
             ydl_opts = {
                 "format": "bestaudio/best",
-                "outtmpl": os.path.join(self.song_dir, "%(title)s.%(ext)s"),
+                "outtmpl": os.path.join(self.song_dir, "%(id)s.%(ext)s"),
                 "writethumbnail": False,
                 "postprocessors": [
                     {
                         "key": "FFmpegExtractAudio",
                         "preferredcodec": format,
-                        "preferredquality": "192",
+                        "preferredquality": "256" if options.get("high_quality", False) else "192",
                     },
                     {"key": "FFmpegMetadata"},
                 ],
                 "noprogress": False,
                 "progress_with_newline": True,
                 "progress_hooks": [self.progress_hook_ui],
+                "quiet": True,
+                "no_warnings": True,
             }
             _setup_cookies(ydl_opts)
 
@@ -294,7 +307,7 @@ class YouTubeAudioDownloader:
                 "duration": video_info["data"]["duration"],
                 "size": self.get_actual_file_size(actual_file) if actual_file else "Unknown",
                 "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "file_path": actual_file if actual_file else f"{video_title}.{format}",
+                "file_path": actual_file if actual_file else f"{safe_title}.{format}",
                 "thumbnail": video_info["data"]["thumbnail"],
                 "url": url,
             }
@@ -363,7 +376,7 @@ class YouTubeAudioDownloader:
     # ---------- File Utilities ---------------------------------------------
     def find_downloaded_file(self, video_title, format):
         try:
-            clean_title = re.sub(r'[<>:"/\\|?*]', "", video_title)
+            clean_title = re.sub(r'[<>:"/\|?*]', '_', video_title)[:150]
             for filename in os.listdir(self.song_dir):
                 if filename.endswith(f".{format}"):
                     if clean_title in filename or video_title in filename:
@@ -542,6 +555,34 @@ class Api:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
+    # ---------- Window management ------------------------------------------
+    def close_app(self):
+        """Close the application window."""
+        if self.window:
+            try:
+                self.window.destroy()
+            except Exception:
+                pass
+        return {"success": True}
+
+    def minimize_app(self):
+        """Minimize the application window."""
+        if self.window:
+            try:
+                self.window.minimize()
+            except Exception:
+                pass
+        return {"success": True}
+
+    def toggle_fullscreen(self):
+        """Toggle fullscreen mode."""
+        if self.window:
+            try:
+                self.window.toggle_fullscreen()
+            except Exception:
+                pass
+        return {"success": True}
+
 
 # ===========================================================================
 # Entry point
@@ -584,17 +625,6 @@ def main():
     )
 
     webview.start(debug=False, http_server=False, private_mode=False)
-
-    # After event loop starts, expose methods from a thread
-    window._js("""
-        window.pywebview._externalApiCalled = {};
-        window.pywebview._bridge = (function(){
-            var api = {};
-            var exposed = window.pywebview._bridge._exposed || {};
-            return api;
-        })();
-    """)
-
 
 
 if __name__ == "__main__":
