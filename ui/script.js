@@ -336,7 +336,7 @@ function displayDownloadHistory(history) {
         return;
     }
 
-    list.innerHTML = history.map(item => `
+list.innerHTML = history.map(item => `
         <div class="history-item">
             <div class="history-thumb" style="${item.thumbnail ? `background-image:url('${item.thumbnail}')` : ''}">
                 ${!item.thumbnail ? '<i class="fas fa-music"></i>' : ''}
@@ -348,10 +348,10 @@ function displayDownloadHistory(history) {
                 </div>
             </div>
             <div class="history-actions">
-                <button class="history-btn" onclick="playAudio('${(item.file_path || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'")}')" title="Play">
+                <button class="history-btn" onclick="playAudio(${JSON.stringify(item.file_path || '')})" title="Play">
                     <i class="fas fa-play"></i>
                 </button>
-                <button class="history-btn" onclick="showInFolder('${(item.file_path || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'")}')" title="Show in folder">
+                <button class="history-btn" onclick="showInFolder(${JSON.stringify(item.file_path || '')})" title="Show in folder">
                     <i class="fas fa-folder-open"></i>
                 </button>
             </div>
