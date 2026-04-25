@@ -277,9 +277,11 @@ class YouTubeAudioDownloader:
             _setup_authentication(ydl_opts)
 
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                ydl.extract_info(url, download=True)
-
-            actual_file = self.find_downloaded_file(video_title, format)
+                result = ydl.extract_info(url, download=True)
+                # Get the actual filepath from yt-dlp's result
+                actual_file = ydl.prepare_filename(result)
+                # Adjust extension if converted
+                actual_file = os.path.splitext(actual_file)[0] + f".{format}"
 
             download_data = {
                 "title": video_title,
@@ -287,7 +289,7 @@ class YouTubeAudioDownloader:
                 "duration": video_info["data"]["duration"],
                 "size": self.get_actual_file_size(actual_file) if actual_file else "Unknown",
                 "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "file_path": actual_file if actual_file else f"{safe_title}.{format}",
+                "file_path": actual_file if actual_file and os.path.exists(actual_file) else f"{safe_title}.{format}",
                 "thumbnail": video_info["data"]["thumbnail"],
                 "url": url,
             }
@@ -409,7 +411,8 @@ class Api:
 
                 video_info = self.downloader.get_video_info(url)
                 if not video_info["success"]:
-                    self._js(f"showError('Failed to get video info: {video_info['error']}')")
+                    error_msg = self.downloader._escape_js_string(video_info["error"])
+                    self._js(f"showError('Failed to get video info: {error_msg}')")
                     return
 
                 if options.get("cover", True):
@@ -431,14 +434,16 @@ class Api:
                         f"}}"
                     )
                 else:
+                    error_msg = self.downloader._escape_js_string(result['error'])
                     self._js(
-                        f"if (typeof showError === 'function') {{ showError('Download failed: {result['error']}'); }}"
+                        f"if (typeof showError === 'function') {{ showError('Download failed: {error_msg}'); }}"
                         f"if (typeof updateProgress === 'function') {{"
                         f"updateProgress(0, 'Download failed', 'Speed: 0 KB/s | Downloaded: 0 KB / 0 KB | ETA: --:--');"
                         f"}}"
                     )
             except Exception as e:
-                self._js(f"if (typeof showError === 'function') {{ showError('Download error: {str(e)}'); }}")
+                error_msg = self.downloader._escape_js_string(str(e))
+                self._js(f"if (typeof showError === 'function') {{ showError('Download error: {error_msg}'); }}")
 
         threading.Thread(target=download_thread, daemon=True).start()
         return {"success": True, "message": "Download started..."}
@@ -459,6 +464,11 @@ class Api:
             self.progress_thread.start()
 
     # ---------- JS helpers -------------------------------------------------
+    def _escape_js_string(self, s):
+        """Safely escape a string for embedding in JavaScript."""
+        import json
+        return json.dumps(str(s))[1:-1]  # Remove surrounding quotes from JSON
+
     def _js(self, code):
         """Send JS to the webview, silently ignoring errors."""
         if self.window:
@@ -512,6 +522,8 @@ class Api:
 
     def change_download_folder(self):
         try:
+            if not self.window:
+                return {"success": False, "error": "Window not initialized"}
             result = self.window.create_file_dialog(webview.FOLDER_DIALOG)
             if result:
                 folder_path = result[0]
