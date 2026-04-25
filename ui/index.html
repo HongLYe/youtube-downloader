@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Audio Downloader</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app">
+        <!-- Custom Title Bar (draggable) -->
+        <div class="titlebar" id="titlebar">
+            <div class="titlebar-left">
+                <div class="traffic-lights">
+                    <span class="traffic-close"></span>
+                    <span class="traffic-minimize"></span>
+                    <span class="traffic-maximize"></span>
+                </div>
+            </div>
+            <div class="titlebar-center">
+                <span>YouTube Audio Downloader</span>
+            </div>
+            <div class="titlebar-right">
+                <i class="fas fa-search" id="titlebar-search-btn"></i>
+            </div>
+        </div>
+
+        <!-- Body row -->
+        <div class="body-row">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-title">
+                        <i class="fab fa-youtube"></i>
+                        <span>Music Downloader</span>
+                    </div>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <div class="nav-group-label">Main</div>
+                    <div class="nav-item active" data-section="download-section">
+                        <i class="fas fa-compact-disc"></i>
+                        <span>Download</span>
+                    </div>
+                    <div class="nav-item" data-section="history-section">
+                        <i class="fas fa-clock-rotate-left"></i>
+                        <span>History</span>
+                    </div>
+
+                    <div class="nav-group-label">Settings</div>
+                    <div class="nav-item" data-section="preferences-section">
+                        <i class="fas fa-sliders"></i>
+                        <span>Preferences</span>
+                    </div>
+                    <div class="nav-item" data-section="folder-section">
+                        <i class="fas fa-folder"></i>
+                        <span>Download Folder</span>
+                    </div>
+                    <div class="nav-item" data-section="about-section">
+                        <i class="fas fa-circle-info"></i>
+                        <span>About</span>
+                    </div>
+                </nav>
+
+                <div class="sidebar-stats">
+                    <div class="stat-row">
+                        <span class="stat-label">Downloads</span>
+                        <span class="stat-value" id="total-downloads">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Storage</span>
+                        <span class="stat-value" id="storage-used">0 MB</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Last</span>
+                        <span class="stat-value" id="last-download">Never</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main -->
+            <main class="main-area">
+                <!-- Toolbar -->
+                <div class="toolbar">
+                    <div class="toolbar-title" id="toolbar-title">Download Audio</div>
+                    <div class="toolbar-spacer"></div>
+                </div>
+
+                <!-- Search Overlay -->
+                <div class="search-overlay" id="search-overlay">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="search-input" placeholder="Search&#x2026;" />
+                    </div>
+                </div>
+
+                <!-- Content -->
+            <div class="content">
+                <!-- Download Section -->
+                <div id="download-section" class="section active">
+                    <div class="section-inner">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fas fa-link"></i>
+                                <span>YouTube URL</span>
+                            </div>
+                            <div class="url-row">
+                                <input type="text" class="url-input" id="url-input" placeholder="Paste YouTube video URL here&#x2026;" />
+                                <button class="btn-paste" id="paste-btn" title="Paste from clipboard">
+                                    <i class="fas fa-clipboard"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Video Preview -->
+                        <div class="card video-preview-card" id="video-preview-card" style="display: none;">
+                            <div class="video-preview">
+                                <div class="video-thumb" id="video-thumbnail">
+                                    <i class="fab fa-youtube"></i>
+                                </div>
+                                <div class="video-meta">
+                                    <div class="video-title" id="video-title">Video Title</div>
+                                    <div class="video-details">
+                                        <span id="video-author"><i class="fas fa-user"></i> Author</span>
+                                        <span id="video-duration"><i class="fas fa-clock"></i> 0:00</span>
+                                        <span id="video-date"><i class="fas fa-calendar"></i> Date</span>
+                                    </div>
+                                    <div class="video-description" id="video-description">Video description will appear here&#x2026;</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Options -->
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fas fa-gear"></i>
+                                <span>Options</span>
+                            </div>
+                            <div class="options-grid">
+                                <div class="option-card selected" data-format="m4a">
+                                    <i class="fas fa-file-audio"></i>
+                                    <span>M4A</span>
+                                    <div class="option-sub">High quality</div>
+                                </div>
+                                <div class="option-card" data-format="mp3">
+                                    <i class="fas fa-music"></i>
+                                    <span>MP3</span>
+                                    <div class="option-sub">Universal</div>
+                                </div>
+                                <div class="option-card selected" data-option="cover">
+                                    <i class="fas fa-image"></i>
+                                    <span>Cover Art</span>
+                                    <div class="option-sub">Thumbnail</div>
+                                </div>
+                                <div class="option-card selected" data-option="metadata">
+                                    <i class="fas fa-tags"></i>
+                                    <span>Metadata</span>
+                                    <div class="option-sub">Tags</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Progress -->
+                        <div class="card" id="progress-card" style="display: none;">
+                            <div class="card-header">
+                                <i class="fas fa-circle-notch fa-spin"></i>
+                                <span id="progress-label">Downloading&#x2026;</span>
+                                <span class="progress-percent" id="progress-percent">0%</span>
+                            </div>
+                            <div class="progress-track">
+                                <div class="progress-fill" id="progress-bar"></div>
+                            </div>
+                            <div class="progress-details" id="progress-details">Speed: 0 KB/s | Downloaded: 0 KB / 0 KB | ETA: --:--</div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="action-bar">
+                            <button class="btn btn-primary" id="download-btn">
+                                <i class="fas fa-download"></i>
+                                Download Audio
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Section -->
+                <div id="history-section" class="section">
+                    <div class="section-inner">
+                        <div class="section-top">
+                            <h3>Download History</h3>
+                            <button class="btn-link" id="clear-history-btn">Clear History</button>
+                        </div>
+                        <div class="history-list" id="history-list">
+                            <div class="empty-state">
+                                <i class="fas fa-clock-rotate-left"></i>
+                                <p>No downloads yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preferences Section -->
+                <div id="preferences-section" class="section">
+                    <div class="section-inner">
+                        <h3>Preferences</h3>
+                        <div class="pref-list">
+                            <div class="pref-row">
+                                <span>Auto-start downloads</span>
+                                <label class="toggle"><input type="checkbox" id="auto-start" checked><span class="toggle-slider"></span></label>
+                            </div>
+                            <div class="pref-row">
+                                <span>Download cover art</span>
+                                <label class="toggle"><input type="checkbox" id="download-cover" checked><span class="toggle-slider"></span></label>
+                            </div>
+                            <div class="pref-row">
+                                <span>Add metadata</span>
+                                <label class="toggle"><input type="checkbox" id="add-metadata" checked><span class="toggle-slider"></span></label>
+                            </div>
+                            <div class="pref-row">
+                                <span>High quality audio</span>
+                                <label class="toggle"><input type="checkbox" id="high-quality"><span class="toggle-slider"></span></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Folder Section -->
+                <div id="folder-section" class="section">
+                    <div class="section-inner">
+                        <h3>Download Folder</h3>
+                        <div class="folder-card">
+                            <div class="folder-path" id="download-folder-path">C:\Users\YourName\Music\YouTube Downloads</div>
+                            <button class="btn btn-secondary" id="change-folder-btn">
+                                <i class="fas fa-folder-open"></i>
+                                Change Folder
+                            </button>
+                        </div>
+                        <div class="pref-list" style="margin-top: 16px;">
+                            <div class="pref-row">
+                                <span>Organize files in subfolders</span>
+                                <label class="toggle"><input type="checkbox" id="organize-files" checked><span class="toggle-slider"></span></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- About Section -->
+                <div id="about-section" class="section">
+                    <div class="section-inner">
+                        <div class="about-card">
+                            <div class="about-icon"><i class="fab fa-youtube"></i></div>
+                            <h2>YouTube Audio Downloader</h2>
+                            <p class="app-version">Version 2.1.0</p>
+                            <p class="about-desc">
+                                Extract high-quality audio from YouTube videos. Download your favorite music in M4A or MP3 format with metadata and cover art.
+                            </p>
+                            <div class="features">
+                                <div class="feature"><i class="fas fa-check-circle"></i> Multiple format support</div>
+                                <div class="feature"><i class="fas fa-check-circle"></i> Cover art download</div>
+                                <div class="feature"><i class="fas fa-check-circle"></i> Metadata embedding</div>
+                                <div class="feature"><i class="fas fa-check-circle"></i> Download history</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Bar -->
+            <div class="statusbar">
+                <span id="status-text">Ready</span>
+                <span class="statusbar-spacer"></span>
+                <span id="status-storage">0 items</span>
+            </div>
+        </main>
+        </div><!-- /.body-row -->
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
