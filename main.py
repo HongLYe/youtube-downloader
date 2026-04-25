@@ -15,40 +15,36 @@ from datetime import datetime
 import requests
 import webview
 import yt_dlp
-
-
-# ===========================================================================
-# Cookie setup — fallback chain
-# ===========================================================================
 import pathlib
 
-def _get_cookie_file_path():
-    """Get cookie file path relative to script location."""
-    script_dir = pathlib.Path(__file__).parent
-    return script_dir / "www.youtube.com_cookies.txt"
+
+# ===========================================================================
+# Authentication setup — using yt-dlp's default behavior
+# ===========================================================================
+# No manual cookie setup needed. yt-dlp handles authentication internally.
+# For age-restricted videos, users can optionally provide cookies via:
+#   - Browser extension export to www.youtube.com_cookies.txt
+#   - Or yt-dlp will prompt for login if needed
 
 
-KNOWN_COOKIE_FILES = [str(_get_cookie_file_path())]
-
-
-def _setup_cookies(ydl_opts: dict):
-    """Try cookie file first, then skip browser cookies to avoid errors.
+def _setup_authentication(ydl_opts: dict):
+    """Configure authentication for yt-dlp.
     
-    Browser cookie extraction often fails when Chrome is running.
-    For age-restricted videos, users should provide a cookie file.
+    Uses yt-dlp's built-in authentication handling.
+    Optional: Support manual cookie file if user provides one.
     """
-    # 1) Cookie file (relative to script, not hardcoded absolute path)
-    for cf in KNOWN_COOKIE_FILES:
-        if cf and os.path.exists(cf) and os.path.getsize(cf) > 0:
-            ydl_opts["cookiefile"] = cf
-            print("✓ Using cookie file for authentication")
-            return
-
-    # Skip browser cookie extraction to avoid Chrome database errors
-    # Browser cookies require Chrome to be closed and proper permissions
-    # Users can manually export cookies if needed for age-restricted content
-    print("ℹ️  No cookie file found. Downloads will work for non-restricted videos.")
-    print("   For age-restricted videos, create a 'www.youtube.com_cookies.txt' file.")
+    # Check for optional manual cookie file
+    script_dir = pathlib.Path(__file__).parent
+    cookie_file = script_dir / "www.youtube.com_cookies.txt"
+    
+    if cookie_file.exists() and cookie_file.stat().st_size > 0:
+        ydl_opts["cookiefile"] = str(cookie_file)
+        print("✓ Using provided cookie file for authentication")
+    else:
+        # yt-dlp will use its default behavior without cookies
+        # This works for most non-age-restricted videos
+        print("ℹ️  Running without cookies. Most videos will download successfully.")
+        print("   For age-restricted content, add a 'www.youtube.com_cookies.txt' file.")
 
 
 # ===========================================================================
@@ -179,7 +175,7 @@ class YouTubeAudioDownloader:
     # ---------- Fetch Video Info -------------------------------------------
     def get_video_info(self, url):
         ydl_opts = {"quiet": True, "no_warnings": True}
-        _setup_cookies(ydl_opts)
+        _setup_authentication(ydl_opts)
 
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -221,7 +217,7 @@ class YouTubeAudioDownloader:
     # ---------- Cover Art --------------------------------------------------
     def download_cover_image(self, url, video_title):
         ydl_opts = {"quiet": True, "no_warnings": True}
-        _setup_cookies(ydl_opts)
+        _setup_authentication(ydl_opts)
 
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -278,7 +274,7 @@ class YouTubeAudioDownloader:
                 "quiet": True,
                 "no_warnings": True,
             }
-            _setup_cookies(ydl_opts)
+            _setup_authentication(ydl_opts)
 
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.extract_info(url, download=True)
