@@ -1,6 +1,6 @@
 # YouTube Audio Downloader
 
-A modern, cross-platform desktop application for downloading audio from YouTube videos. Available in both GUI (CustomTkinter) and webview-based versions.
+A modern, cross-platform desktop application for downloading audio from YouTube videos.
 
 ## Features
 
@@ -34,12 +34,10 @@ pip install -r requirements.txt
 
 ## Usage
 
-### GUI Version (Recommended)
-
-Run the CustomTkinter-based GUI application:
+Run the application:
 
 ```bash
-python youtube_mp3_gui.py
+python main.py
 ```
 
 **Features:**
@@ -47,16 +45,6 @@ python youtube_mp3_gui.py
 - System theme detection (dark/light mode)
 - Real-time download progress
 - Settings management
-
-### WebView Version
-
-Run the webview-based application:
-
-```bash
-python main.py
-```
-
-**Features:**
 - Cross-platform web-based UI
 - Built-in HTTP server
 - Browser-like interface
@@ -104,14 +92,12 @@ The application will automatically detect and use these cookies.
 - **pywebview** (>=4.4.1): Cross-platform webview library
 - **yt-dlp** (>=2024.10.0): YouTube video downloader
 - **requests** (>=2.32.3): HTTP library
-- **customtkinter** (>=5.2.0): Modern GUI framework
 
 ## Project Structure
 
 ```
 youtube-downloader/
-├── main.py                 # WebView-based application
-├── youtube_mp3_gui.py      # CustomTkinter GUI application
+├── main.py                 # Main application
 ├── requirements.txt        # Python dependencies
 ├── settings.json          # Application settings
 ├── download_history.json  # Download history tracking
@@ -141,6 +127,7 @@ If you encounter errors with age-restricted videos, set up browser cookies as de
 ### GUI Issues
 - On Linux, ensure you have tkinter installed: `sudo apt-get install python3-tk`
 - On macOS, you may need to grant screen recording permissions
+- Ensure pywebview dependencies are installed for your platform
 
 ## License
 
