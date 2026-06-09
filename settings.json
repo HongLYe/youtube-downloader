@@ -2,7 +2,7 @@
   "auto_start": true,
   "download_cover": true,
   "add_metadata": true,
-  "high_quality": false,
+  "high_quality": true,
   "organize_files": true,
   "download_folder": "C:\\Users\\GioZ\\Desktop\\Music_mp3",
   "total_downloads": 2,
