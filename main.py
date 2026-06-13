@@ -74,7 +74,7 @@ class YouTubeAudioDownloader:
             "auto_start": True,
             "download_cover": True,
             "add_metadata": True,
-            "high_quality": False,
+            "high_quality": True,
             "organize_files": True,
             "download_folder": self.song_dir,
             "total_downloads": 0,
