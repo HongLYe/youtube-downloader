@@ -1,139 +1,135 @@
 # YouTube Audio Downloader
 
-A modern, cross-platform desktop application for downloading audio from YouTube videos.
+Current version: 1.1.0
 
-## Features
+A desktop app for downloading audio from YouTube videos and playlists in MP3 or M4A format. The interface is a modern web-based UI powered by Python and pywebview, and it includes download history, progress updates, theme support, and optional cookie-based authentication for restricted content.
 
-- 🎵 **YouTube Audio Extraction**: Download audio from YouTube videos in MP3 format
-- 🎨 **Modern UI**: Clean, macOS-inspired interface with dark/light mode support
-- 📀 **Metadata Support**: Automatically embed cover art and metadata in downloaded files
-- 📁 **File Organization**: Organize downloads by artist/album structure
-- 🔒 **Cookie Authentication**: Supports browser cookie integration for age-restricted content
-- ⚡ **High Quality**: Configurable audio quality options
-- 📊 **Download History**: Track your downloads with history management
+## What this project does
+
+- Download a single YouTube video as audio
+- Download an entire playlist
+- Save files to a chosen folder
+- Embed cover art and metadata when available
+- Track previous downloads and storage usage
+- Support optional browser cookies for restricted videos
+
+## Requirements
+
+Before installing, make sure you have:
+
+- Python 3.9 or newer
+- pip
+- FFmpeg installed and available in your PATH
+
+### FFmpeg installation
+
+- Windows: install FFmpeg and add it to PATH, or use a package manager such as winget
+- macOS: brew install ffmpeg
+- Linux: sudo apt install ffmpeg
 
 ## Installation
 
-### Prerequisites
-
-- Python 3.8 or higher
-- pip package manager
-
-### Setup
-
 1. Clone the repository:
+
 ```bash
 git clone <repository-url>
-cd youtube-downloader
+cd "yt - UI update"
 ```
 
-2. Install dependencies:
+2. Create and activate a virtual environment (recommended):
+
 ```bash
-pip install -r requirements.txt
+python -m venv .venv
 ```
 
-## Usage
+Windows:
 
-Run the application:
+```powershell
+.\.venv\Scripts\activate
+```
+
+macOS/Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+3. Install Python dependencies:
+
+```bash
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+4. Start the application:
 
 ```bash
 python main.py
 ```
 
-**Features:**
-- Modern, responsive interface
-- System theme detection (dark/light mode)
-- Real-time download progress
-- Settings management
-- Cross-platform web-based UI
-- Built-in HTTP server
-- Browser-like interface
+## How to use it
 
-## Configuration
+### Single video download
 
-Settings are stored in `settings.json`:
+1. Open the app.
+2. Paste a YouTube video URL into the main input field.
+3. Choose a format such as MP3 or M4A.
+4. Select any extra options like cover art or metadata.
+5. Click Download.
 
-```json
-{
-  "auto_start": true,
-  "download_cover": true,
-  "add_metadata": true,
-  "high_quality": false,
-  "organize_files": true,
-  "download_folder": "C:\\Users\\YourName\\Music",
-  "total_downloads": 0,
-  "storage_used": "0 MB"
-}
-```
+### Playlist download
 
-### Settings Options
+1. Open the Playlist tab.
+2. Paste a YouTube playlist URL.
+3. Click Download Playlist.
+4. The app will save each track into a playlist folder.
 
-| Setting | Description | Default |
-|---------|-------------|---------|
-| `auto_start` | Auto-start downloads | `true` |
-| `download_cover` | Download album artwork | `true` |
-| `add_metadata` | Embed metadata in files | `true` |
-| `high_quality` | Use highest audio quality | `false` |
-| `organize_files` | Organize by artist/album | `true` |
-| `download_folder` | Output directory | User-specific |
+### Settings and folder selection
 
-## Cookie Setup (Optional)
+- Use the Preferences section to change quality, metadata, and cover options.
+- Use the Download Folder section to choose where files are stored.
+- Download history and stats are shown in the History section.
 
-For age-restricted videos, you can export cookies from your browser:
+## Project structure
 
-1. Install a browser extension like "Get cookies.txt LOCALLY"
-2. Export cookies from youtube.com
-3. Save as `www.youtube.com_cookies.txt` in the project directory
-
-The application will automatically detect and use these cookies.
-
-## Dependencies
-
-- **pywebview** (>=4.4.1): Cross-platform webview library
-- **yt-dlp** (>=2024.10.0): YouTube video downloader
-- **requests** (>=2.32.3): HTTP library
-
-## Project Structure
-
-```
-youtube-downloader/
-├── main.py                 # Main application
+```text
+.
+├── api/
+│   └── bridge.py           # Connects the UI to the Python backend
+├── core/
+│   ├── downloader.py       # Main download, playlist, and progress logic
+│   └── validators.py       # URL validation helpers
+├── ui/
+│   ├── index.html          # Main UI layout
+│   ├── script.js           # Frontend behavior and API calls
+│   └── styles.css          # Styling for the desktop UI
+├── utils/
+│   ├── auth.py             # Optional cookie authentication support
+│   └── formatters.py       # Formatting helpers for sizes/durations
+├── main.py                 # Entry point for the app
 ├── requirements.txt        # Python dependencies
-├── settings.json          # Application settings
-├── download_history.json  # Download history tracking
-├── ui/                     # Web interface files
-│   ├── index.html         # Main HTML page
-│   ├── script.js          # Frontend JavaScript
-│   └── styles.css         # Styling
-└── README.md              # This file
+├── settings.json           # Saved preferences
+├── download_history.json   # Download history data
+├── README.md               # Project overview
+└── DEVELOPER_GUIDE.md      # Quick guide for contributors
 ```
 
-## Platform Support
+## Optional cookie setup
 
-- ✅ Windows 10/11
-- ✅ macOS
-- ✅ Linux
+If you run into age-restricted or login-gated videos, place a cookies file named `www.youtube.com_cookies.txt` in the project root. The app will automatically use it if the file is present and not empty.
 
 ## Troubleshooting
 
-### Age-Restricted Videos
-If you encounter errors with age-restricted videos, set up browser cookies as described in the [Cookie Setup](#cookie-setup-optional) section.
+- If downloads fail, confirm that FFmpeg is installed and available in PATH.
+- If a video is blocked, try adding browser cookies.
+- If the app does not start, make sure the Python dependencies were installed successfully.
+- If a download folder cannot be changed, confirm the selected location is writable.
 
-### Download Failures
-- Ensure you have a stable internet connection
-- Update yt-dlp: `pip install --upgrade yt-dlp`
-- Check if the video is available in your region
+## Developer guide
 
-### GUI Issues
-- On Linux, ensure you have tkinter installed: `sudo apt-get install python3-tk`
-- On macOS, you may need to grant screen recording permissions
-- Ensure pywebview dependencies are installed for your platform
+For a faster introduction to the codebase, see [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md).
 
 ## License
 
-This project is provided as-is for educational purposes. Please respect YouTube's Terms of Service and copyright laws when using this application.
-
-## Disclaimer
-
-This tool is intended for downloading content that you have the right to download. The developers are not responsible for any misuse of this software or copyright infringement.
+This project is provided for educational and personal use. Please respect YouTube's Terms of Service and local copyright laws.
 

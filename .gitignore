@@ -31,4 +31,34 @@ target/
 # OS generated files
 .DS_Store
 Thumbs.db
-```
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# YouTube cookies
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# YouTube cookies
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# YouTube cookies
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# YouTube cookies
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# YouTube cookies
+www.youtube.com_cookies.txt
